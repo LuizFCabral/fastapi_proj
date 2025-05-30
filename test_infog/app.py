@@ -26,8 +26,20 @@ def register_user(user: UserPass):
 
 
 @app.get('/user/', status_code=HTTPStatus.OK, response_model=UsersList)
-def read_user():
+def read_users():
     return {'users': database}
+
+
+@app.get(
+    '/user/{user_id}', status_code=HTTPStatus.OK, response_model=UserResponseSchema
+)
+def read_user_id(user_id: int):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='User not found')
+
+    user = database[user_id - 1]
+    user_with_id = UserResponseSchema(**user.model_dump())
+    return user_with_id
 
 
 @app.put('/user/{user_id}', response_model=UserResponseSchema)
