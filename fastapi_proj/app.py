@@ -1,8 +1,8 @@
 from http import HTTPStatus
 from fastapi import FastAPI, HTTPException
 
-from test_infog.schemas.user_schemas import Message
-from test_infog.schemas.user_schemas import (
+from fastapi_proj.schemas.user_schemas import Message
+from fastapi_proj.schemas.user_schemas import (
     UserPass,
     UserResponseSchema,
     UsersList,
