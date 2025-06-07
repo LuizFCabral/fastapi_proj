@@ -1,5 +1,5 @@
 [project]
-name = "test-infog"
+name = "fastapi_proj"
 version = "0.1.0"
 description = ""
 authors = [
@@ -44,7 +44,7 @@ addopts = '-p no:warnings'
 lint='ruff check'
 pre_format='ruff check --fix'
 format='ruff format'
-run='fastapi dev test_infog/app.py'
+run='fastapi dev fastapi_proj/app.py'
 pre_test='task lint'
-test='pytest -s -x --cov=test_infog -vv'
+test='pytest -s -x --cov=fastapi_proj -vv'
 post_test='coverage html'
