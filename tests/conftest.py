@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from sqlalchemy.pool import StaticPool
 
 from fastapi_proj.app import app
-from fastapi_proj.models import table_registry
+from fastapi_proj.models import User, table_registry
 from fastapi_proj.database import get_session
 
 
@@ -58,3 +58,13 @@ def _mock_db_time(*, model, time=datetime(2025, 6, 26)):
 @pytest.fixture
 def mock_db_time():
     return _mock_db_time
+
+
+@pytest.fixture
+def user(session):
+    user = User(username='teste', email='test@example.com', password='segredo')
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
