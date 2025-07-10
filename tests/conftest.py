@@ -62,7 +62,7 @@ def mock_db_time():
 
 @pytest.fixture
 def user(session):
-    user = User(username='teste', email='test@example.com', password='segredo')
+    user = User(username='teste', email='test@example.com', password='secret')
     session.add(user)
     session.commit()
     session.refresh(user)

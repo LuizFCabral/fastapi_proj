@@ -12,7 +12,7 @@ def test_root_return_ola_mundo(client):
 def test_register_user(client):
     response = client.post(
         '/user/',
-        json={'username': 'teste', 'email': 'test@example.com', 'password': 'segredo'},
+        json={'username': 'teste', 'email': 'test@example.com', 'password': 'secret'},
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -58,7 +58,7 @@ def test_update_user(client, user):
         json={
             'username': 'teste1',
             'email': 'test1@example.com',
-            'password': 'segredo1',
+            'password': 'secret1',
         },
     )
 
@@ -76,7 +76,7 @@ def test_update_user_not_found(client):
         json={
             'username': 'teste1',
             'email': 'test1@example.com',
-            'password': 'segredo1',
+            'password': 'secret1',
         },
     )
     assert response.status_code == HTTPStatus.NOT_FOUND
@@ -96,13 +96,40 @@ def test_delete_user_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_update_interidity_error(client, user):
+def test_register_usernname_integrity_error(client, user):
+    response_update = client.post(
+        '/user/',
+        json={
+            'username': 'teste',
+            'email': 'test1@example.com',
+            'password': 'secret',
+        },
+    )
+
+    assert response_update.status_code == HTTPStatus.CONFLICT
+    assert response_update.json() == {'detail': 'Username already exists'}
+
+def test_register_email_integrity_error(client, user):
+    response_update = client.post(
+        '/user/',
+        json={
+            'username': 'teste1',
+            'email': 'test@example.com',
+            'password': 'secret',
+        },
+    )
+
+    assert response_update.status_code == HTTPStatus.CONFLICT
+    assert response_update.json() == {'detail': 'Email already exists'}
+
+
+def test_update_integrity_error(client, user):
     client.post(
         '/user/',
         json={
             'username': 'error_update',
             'email': 'error_update@example.com',
-            'password': 'segredo',
+            'password': 'secret',
         },
     )
 
@@ -111,7 +138,7 @@ def test_update_interidity_error(client, user):
         json={
             'username': 'error_update',
             'email': 'error_update@example.com',
-            'password': 'segredo',
+            'password': 'secret',
         },
     )
 
