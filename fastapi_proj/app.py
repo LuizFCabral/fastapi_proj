@@ -26,9 +26,10 @@ def user_exists(user_id, session: Session):
     return db_user
 
 
-@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
+@app.get('/', status_code=HTTPStatus.OK)
 def read_root():
-    return {'message': 'Olá mundo!'}
+    print(get_session)
+    return {'message': get_session}
 
 
 @app.post('/user/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
