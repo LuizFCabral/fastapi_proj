@@ -109,6 +109,7 @@ def test_register_usernname_integrity_error(client, user):
     assert response_update.status_code == HTTPStatus.CONFLICT
     assert response_update.json() == {'detail': 'Username already exists'}
 
+
 def test_register_email_integrity_error(client, user):
     response_update = client.post(
         '/user/',
