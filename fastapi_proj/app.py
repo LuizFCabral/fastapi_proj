@@ -11,7 +11,11 @@ from fastapi_proj.database import get_session
 from fastapi_proj.models import User
 from fastapi_proj.schemas.user_schemas import Message
 from fastapi_proj.schemas.user_schemas import UserSchema, UserPublic, UsersList, Token
-from fastapi_proj.security import get_password_hash, verify_password
+from fastapi_proj.security import (
+    get_password_hash,
+    verify_password,
+    create_access_token,
+)
 
 app = FastAPI(title='Test Infog')
 
@@ -26,8 +30,7 @@ def user_exists(user_id, session: Session):
 
 @app.get('/', status_code=HTTPStatus.OK)
 def read_root():
-    print(get_session)
-    return {'message': get_session}
+    return {'message': 'Olá mundo!'}
 
 
 @app.post('/user/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
@@ -122,3 +125,6 @@ def get_token(
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED, detail='Incorrect email or password'
         )
+
+    access_token = create_access_token({'sub': user.email})
+    return {'access_token': access_token, 'token_type': 'Bearer'}

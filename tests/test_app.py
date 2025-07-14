@@ -145,3 +145,15 @@ def test_update_integrity_error(client, user):
 
     assert response_update.status_code == HTTPStatus.CONFLICT
     assert response_update.json() == {'detail': 'User name or email already exists'}
+
+
+def test_get_token(client, user):
+    response = client.post(
+        '/token', data={'username': user.email, 'password': user.clean_password}
+    )
+
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert token['token_type'] == 'Bearer'
+    assert 'access_token' in token
