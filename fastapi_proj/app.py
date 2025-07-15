@@ -15,6 +15,7 @@ from fastapi_proj.security import (
     get_password_hash,
     verify_password,
     create_access_token,
+    get_current_user,
 )
 
 app = FastAPI(title='Test Infog')
@@ -65,34 +66,50 @@ def register_user(user: UserSchema, session: Session = Depends(get_session)):
 
 @app.get('/user/', status_code=HTTPStatus.OK, response_model=UsersList)
 def read_users(
-    limit: int = 10, offset: int = 0, session: Session = Depends(get_session)
+    limit: int = 10,
+    offset: int = 0,
+    session: Session = Depends(get_session),
+    current_user=Depends(get_current_user),
 ):
     users = session.scalars(select(User).limit(limit).offset(offset))
     return {'users': users}
 
 
 @app.get('/user/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def read_user_id(user_id: int, session: Session = Depends(get_session)):
-    user = user_exists(user_id, session)
-
-    return user
-
-
-@app.put('/user/{user_id}', response_model=UserPublic)
-def update_user(
-    user_id: int, user: UserSchema, session: Session = Depends(get_session)
+def read_user_id(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user=Depends(get_current_user),
 ):
-    user_db = user_exists(user_id, session)
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
+        )
 
-    user_db.username = user.username
-    user_db.email = user.email
-    user_db.password = get_password_hash(user.password)
+    return current_user
+
+
+@app.put('/user/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
+def update_user(
+    user_id: int,
+    user: UserSchema,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
+        )
 
     try:
-        session.add(user_db)
+        current_user.username = user.username
+        current_user.email = user.email
+        current_user.password = get_password_hash(user.password)
+
+        session.add(current_user)
         session.commit()
-        session.refresh(user_db)
-        return user_db
+        session.refresh(current_user)
+        return current_user
     except IntegrityError:
         raise HTTPException(
             detail='User name or email already exists', status_code=HTTPStatus.CONFLICT
@@ -100,10 +117,17 @@ def update_user(
 
 
 @app.delete('/user/{user_id}', response_model=Message)
-def delete_user(user_id: int, session: Session = Depends(get_session)):
-    user_db = user_exists(user_id, session)
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user=Depends(get_current_user),
+):
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
+        )
 
-    session.delete(user_db)
+    session.delete(current_user)
     session.commit()
 
     return {'message': 'User deleted'}
