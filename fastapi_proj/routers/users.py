@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 
 from sqlalchemy import select
@@ -25,7 +25,7 @@ from fastapi_proj.security import (
 router = APIRouter(prefix='/users', tags=['users'])
 Session = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
-# FilterPage = Annotated[FilterPage, Query()]
+FilterPage = Annotated[FilterPage, Query()]
 
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
@@ -62,7 +62,7 @@ def register_user(user: UserSchema, session: Session):  # type: ignore
 def read_users(
     session: Session,  # type: ignore
     current_user: CurrentUser,
-    filter_users: FilterPage  # type: ignore
+    filter_users: FilterPage,  # type: ignore
 ):
     users = session.scalars(
         select(User).limit(filter_users.limit).offset(filter_users.offset)

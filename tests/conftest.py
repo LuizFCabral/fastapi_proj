@@ -10,6 +10,7 @@ from sqlalchemy.pool import StaticPool
 from fastapi_proj.app import app
 from fastapi_proj.models import User, table_registry
 from fastapi_proj.database import get_session
+from fastapi_proj.setting import Settings
 from fastapi_proj.security import get_password_hash
 
 
@@ -83,3 +84,8 @@ def token(client, user):
     )
 
     return response.json()['access_token']
+
+
+@pytest.fixture
+def settings():
+    return Settings()
