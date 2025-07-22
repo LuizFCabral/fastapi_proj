@@ -38,7 +38,7 @@ async def test_get_session():
     assert hasattr(gen, '__aiter__')
 
     # Obtém a sessão do gerador
-    session = await anext(gen) 
+    session = await anext(gen)
 
     assert isinstance(session, AsyncSession)
     assert session.bind is engine
