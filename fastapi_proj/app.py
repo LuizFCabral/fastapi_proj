@@ -1,4 +1,5 @@
 from http import HTTPStatus
+
 from fastapi import FastAPI
 
 from fastapi_proj.routers import auth, users

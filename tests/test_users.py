@@ -1,11 +1,16 @@
 from http import HTTPStatus
+
 from fastapi_proj.schemas.schemas import UserPublic
 
 
 def test_register_user(client):
     response = client.post(
         '/users/',
-        json={'username': 'teste', 'email': 'test@example.com', 'password': 'secret'},
+        json={
+            'username': 'teste',
+            'email': 'test@example.com',
+            'password': 'secret',
+        },
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -18,7 +23,9 @@ def test_register_user(client):
 
 def test_read_users(client, user, token):
     user_schema = UserPublic.model_validate(user).model_dump()
-    response = client.get('/users/', headers={'Authorization': f'Bearer {token}'})
+    response = client.get(
+        '/users/', headers={'Authorization': f'Bearer {token}'}
+    )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'users': [user_schema]}
 
@@ -112,4 +119,39 @@ def test_update_integrity_error(client, user, token):
     )
 
     assert response_update.status_code == HTTPStatus.CONFLICT
-    assert response_update.json() == {'detail': 'User name or email already exists'}
+    assert response_update.json() == {
+        'detail': 'User name or email already exists'
+    }
+
+
+def test_read_user_without_permission(client, token):
+    response = client.get(
+        '/users/100000000', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
+
+
+def test_update_user_without_permission(client, token):
+    response = client.put(
+        '/users/100000000',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'username': 'teste1',
+            'email': 'test1@example.com',
+            'password': 'secret1',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
+
+
+def test_delete_user_without_permission(client, token):
+    response = client.delete(
+        '/users/100000000', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}

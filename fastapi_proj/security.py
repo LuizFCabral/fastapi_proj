@@ -1,25 +1,20 @@
-from pwdlib import PasswordHash
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 from http import HTTPStatus
+from zoneinfo import ZoneInfo
 
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-
-from jwt import encode, decode, DecodeError
 from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jwt import DecodeError, decode, encode
+from pwdlib import PasswordHash
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi_proj.database import get_session
 from fastapi_proj.models import User
 from fastapi_proj.setting import Settings
 
-from fastapi.security import OAuth2PasswordBearer
-
-
 pwd_content = PasswordHash.recommended()
-
 settings = Settings()
-
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
@@ -40,13 +35,16 @@ def create_access_token(data: dict):
 
     to_encode.update({'exp': expire})
 
-    encoded_jwt = encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
 
     return encoded_jwt
 
 
-def get_current_user(
-    session: Session = Depends(get_session), token: str = Depends(oauth2_schema)
+async def get_current_user(
+    session: AsyncSession = Depends(get_session),
+    token: str = Depends(oauth2_schema),
 ):
     credentials_exception = HTTPException(
         status_code=HTTPStatus.UNAUTHORIZED,
@@ -55,7 +53,9 @@ def get_current_user(
     )
 
     try:
-        payload = decode(token, settings.SECRET_KEY, algorithms=settings.ALGORITHM)
+        payload = decode(
+            token, settings.SECRET_KEY, algorithms=settings.ALGORITHM
+        )
         subject_email = payload.get('sub')
 
         if not subject_email:
@@ -63,7 +63,9 @@ def get_current_user(
     except DecodeError:
         raise credentials_exception
 
-    user = session.scalar(select(User).where(User.email == subject_email))
+    user = await session.scalar(
+        select(User).where(User.email == subject_email)
+    )
 
     if not user:
         raise credentials_exception

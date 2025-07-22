@@ -1,18 +1,18 @@
+from contextlib import contextmanager
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy import event
-from datetime import datetime
-from contextlib import contextmanager
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import StaticPool
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-
 from fastapi_proj.app import app
-from fastapi_proj.models import User, table_registry
 from fastapi_proj.database import get_session
-from fastapi_proj.setting import Settings
+from fastapi_proj.models import User, table_registry
 from fastapi_proj.security import get_password_hash
+from fastapi_proj.setting import Settings
 
 
 @pytest.fixture
@@ -35,8 +35,8 @@ async def session():
         poolclass=StaticPool,
     )
 
-    async with engine.begin() as conn: 
-        await conn.run_sync(table_registry.metadata.create_all) 
+    async with engine.begin() as conn:
+        await conn.run_sync(table_registry.metadata.create_all)
 
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
@@ -69,7 +69,9 @@ def mock_db_time():
 async def user(session: AsyncSession):
     password = 'testtest'
     user = User(
-        username='teste', email='test@example.com', password=get_password_hash(password)
+        username='teste',
+        email='test@example.com',
+        password=get_password_hash(password),
     )
     session.add(user)
     await session.commit()
@@ -83,7 +85,8 @@ async def user(session: AsyncSession):
 @pytest.fixture
 def token(client, user):
     response = client.post(
-        '/auth/token', data={'username': user.email, 'password': user.clean_password}
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_password},
     )
 
     return response.json()['access_token']

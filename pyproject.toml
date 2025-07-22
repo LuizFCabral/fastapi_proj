@@ -30,11 +30,11 @@ pytest-cov = "^6.1.1"
 taskipy = "^1.14.1"
 pytest-asyncio = "^1.1.0"
 
-[toll.ruff]
-line-lenght = 79
+[tool.ruff]
+line-length = 79
 extend-exclude = ['migrations']
 
-[toll.ruff.lint]
+[tool.ruff.lint]
 preview = true
 select = ['I', 'F', 'E', 'W', 'PL', 'PT', 'FAST']
 
@@ -56,3 +56,6 @@ run='fastapi dev fastapi_proj/app.py'
 pre_test='task lint'
 test='pytest -s -x --cov=fastapi_proj -vv'
 post_test='coverage html'
+
+[tool.coverage.run]
+concurrency = ["thread", "greenlet"]
