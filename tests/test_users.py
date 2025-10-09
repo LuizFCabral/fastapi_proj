@@ -98,22 +98,14 @@ def test_register_email_integrity_error(client, user):
     assert response_update.json() == {'detail': 'Email already exists'}
 
 
-def test_update_integrity_error(client, user, token):
-    client.post(
-        '/users/',
-        json={
-            'username': 'error_update',
-            'email': 'error_update@example.com',
-            'password': 'secret',
-        },
-    )
+def test_update_integrity_error(client, user, other_user, token):
 
     response_update = client.put(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'error_update',
-            'email': 'error_update@example.com',
+            'username': other_user.username,
+            'email': other_user.email,
             'password': 'secret',
         },
     )
