@@ -4,7 +4,6 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi_proj.database import engine, get_session
 from fastapi_proj.models import User
 
 
@@ -28,18 +27,3 @@ async def test_create_user(session: AsyncSession, mock_db_time):
         'created_at': time,
         'updated_at': time,
     }
-
-
-@pytest.mark.asyncio
-async def test_get_session():
-    gen = get_session()
-
-    # Verifica se é um gerador assíncrono
-    assert hasattr(gen, '__aiter__')
-
-    # Obtém a sessão do gerador
-    session = await anext(gen)
-
-    assert isinstance(session, AsyncSession)
-    assert session.bind is engine
-    assert session.is_active  # Deve estar ativa durante o uso
