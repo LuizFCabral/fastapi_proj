@@ -99,7 +99,6 @@ def test_register_email_integrity_error(client, user):
 
 
 def test_update_integrity_error(client, user, other_user, token):
-
     response_update = client.put(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
