@@ -18,6 +18,7 @@ def test_register_user(client):
         'username': 'teste',
         'email': 'test@example.com',
         'id': 1,
+        # 'todos': [],
     }
 
 

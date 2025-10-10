@@ -60,7 +60,6 @@ async def register_user(user: UserSchema, session: Session):  # type: ignore
 @router.get('/', status_code=HTTPStatus.OK, response_model=UsersList)
 async def read_users(
     session: Session,
-    current_user: CurrentUser,
     filter_users: T_FilterPage,
 ):
     users = await session.scalars(
@@ -72,7 +71,6 @@ async def read_users(
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
 async def read_user_id(
     user_id: int,
-    session: Session,
     current_user: CurrentUser,
 ):
     if current_user.id != user_id:
