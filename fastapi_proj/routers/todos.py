@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +10,7 @@ from fastapi_proj.database import get_session
 from fastapi_proj.models import Todo, User
 from fastapi_proj.schemas.schemas import (
     FilterTodo,
+    Message,
     TodoList,
     TodoPublic,
     TodoSchema,
@@ -61,4 +62,21 @@ async def list_todos(
         query.limit(todo_filter.limit).offset(todo_filter.offset)
     )
 
-    return {'todos': todos}
+    return {'todos': todos.all()}
+
+
+@router.delete('/{todo_id}', status_code=HTTPStatus.OK, response_model=Message)
+async def delete_todo(todo_id: int, session: Session, user: CurrentUser):
+    todo = await session.scalar(
+        select(Todo).where(Todo.id == todo_id, Todo.user_id == user.id)
+    )
+
+    if not todo:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Task not found',
+        )
+
+    await session.delete(todo)
+
+    return {'message': 'Task deleted successfully'}
