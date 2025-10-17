@@ -14,6 +14,7 @@ from fastapi_proj.schemas.schemas import (
     TodoList,
     TodoPublic,
     TodoSchema,
+    TodoUpdate,
 )
 from fastapi_proj.security import get_current_user
 
@@ -80,3 +81,23 @@ async def delete_todo(todo_id: int, session: Session, user: CurrentUser):
     await session.delete(todo)
 
     return {'message': 'Task deleted successfully'}
+
+
+@router.patch(
+    '/{todo_id}', status_code=HTTPStatus.OK, response_model=TodoPublic
+)
+async def update_todo(
+    todo_id: int,
+    todo_update: TodoUpdate,
+    session: Session,
+    user: CurrentUser,
+):
+    todo = await session.scalar(
+        select(Todo).where(Todo.id == todo_id, Todo.user_id == user.id)
+    )
+
+    if not todo:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail='Task not found',
+        )

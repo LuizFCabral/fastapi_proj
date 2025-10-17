@@ -164,7 +164,18 @@ async def test_delete_other_user_todo(client, other_user, session, token):
     await session.commit()
 
     response = client.delete(
-        '/todos/{todo_other_user.id}', headers={'Authorization': f'Bearer {token}'}
+        f'/todos/{todo_other_user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Task not found'}
+
+
+# @pytest.mark.asyncio
+def test_patch_todo_error(client, token):
+    response = client.patch(
+        '/todos/10', json={}, headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
