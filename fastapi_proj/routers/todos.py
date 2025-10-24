@@ -101,3 +101,12 @@ async def update_todo(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Task not found',
         )
+
+    for key, value in todo_update.model_dump(exclude_unset=True).items():
+        setattr(todo, key, value)
+
+    session.add(todo)
+    await session.commit()
+    await session.refresh(todo)
+
+    return todo
