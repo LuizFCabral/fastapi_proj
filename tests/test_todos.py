@@ -17,16 +17,17 @@ class TodoFactory(factory.Factory):
     user_id = 1
 
 
-def test_create_todo(client, token):
-    response = client.post(
-        '/todos/',
-        headers={'Authorization': f'Bearer {token}'},
-        json={
-            'title': 'test',
-            'description': 'testing todo creation',
-            'state': 'draft',
-        },
-    )
+def test_create_todo(client, token, mock_db_time):
+    with mock_db_time(model=Todo) as time:
+        response = client.post(
+            '/todos/',
+            headers={'Authorization': f'Bearer {token}'},
+            json={
+                'title': 'test',
+                'description': 'testing todo creation',
+                'state': 'draft',
+            },
+        )
 
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
@@ -34,6 +35,8 @@ def test_create_todo(client, token):
         'description': 'testing todo creation',
         'state': 'draft',
         'id': 1,
+        'created_at': time.isoformat(),
+        'updated_at': time.isoformat(),
     }
 
 
