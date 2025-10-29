@@ -105,8 +105,6 @@ async def update_todo(
     for key, value in todo_update.model_dump(exclude_unset=True).items():
         setattr(todo, key, value)
 
-    print(f'Valor do todo: {todo}')
-
     session.add(todo)
     await session.commit()
     await session.refresh(todo)

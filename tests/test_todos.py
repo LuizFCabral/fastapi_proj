@@ -3,8 +3,9 @@ from http import HTTPStatus
 import factory
 import factory.fuzzy
 import pytest
+from sqlalchemy import select
 
-from fastapi_proj.models import Todo, TodoState
+from fastapi_proj.models import Todo, TodoState, User
 
 
 class TodoFactory(factory.Factory):
@@ -198,3 +199,39 @@ async def test_patch_todo(client, user, session, token):
 
     assert response.status_code == HTTPStatus.OK
     assert response.json()['title'] == 'Updated title'
+
+
+@pytest.mark.asyncio
+async def test_create_todo_unexisting_state_error(session, user: User):
+    todo = Todo(
+        title='test',
+        description='testing todo creation',
+        state='invalid_state',
+        user_id=user.id,
+    )
+
+    session.add(todo)
+    await session.commit()
+
+    with pytest.raises(LookupError):
+        await session.scalar(select(Todo))
+
+
+@pytest.mark.asyncio
+async def test_list_todo_filter_min_lenght(client, token):
+    response = client.get(
+        '/todos/?title=ab', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.asyncio
+async def test_list_todo_filter_max_lenght(client, token):
+    max_lenght = 'a' * 51
+    response = client.get(
+        f'/todos/?title={max_lenght}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
