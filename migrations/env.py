@@ -1,12 +1,16 @@
 import asyncio
-from logging.config import fileConfig
+import sys
 
+from logging.config import fileConfig
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 from fastapi_proj.models import table_registry
 from fastapi_proj.setting import Settings
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
