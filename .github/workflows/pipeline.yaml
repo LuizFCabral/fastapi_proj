@@ -21,3 +21,9 @@ jobs:
 
       - name: Executar os testes
         run: poetry run task test
+
+    env:
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      ACCESS_TOKEN_EXPIRE_MIN: ${{secrets.ACCESS_TOKEN_EXPIRE_MIN}}
+      ALGORITHM: ${{secrets.ALGORITHM}}
+      SECRET_KEY: ${{secrets.SECRET_KEY}}
